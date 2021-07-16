@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\AttackRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -43,6 +45,22 @@ class Attack
      * @ORM\Column(type="integer")
      */
     private $power;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Pokemon::class, mappedBy="attacks")
+     */
+    private $pokemon;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="attacks")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $type;
+
+    public function __construct()
+    {
+        $this->pokemon = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +123,45 @@ class Attack
     public function setPower(int $power): self
     {
         $this->power = $power;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Pokemon[]
+     */
+    public function getPokemon(): Collection
+    {
+        return $this->pokemon;
+    }
+
+    public function addPokemon(Pokemon $pokemon): self
+    {
+        if (!$this->pokemon->contains($pokemon)) {
+            $this->pokemon[] = $pokemon;
+            $pokemon->addAttack($this);
+        }
+
+        return $this;
+    }
+
+    public function removePokemon(Pokemon $pokemon): self
+    {
+        if ($this->pokemon->removeElement($pokemon)) {
+            $pokemon->removeAttack($this);
+        }
+
+        return $this;
+    }
+
+    public function getType(): ?Type
+    {
+        return $this->type;
+    }
+
+    public function setType(?Type $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }

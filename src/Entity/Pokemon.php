@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\PokemonRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -48,6 +50,22 @@ class Pokemon
      * @ORM\Column(type="integer")
      */
     private $sorting_number;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Type::class, inversedBy="pokemon")
+     */
+    private $types;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Attack::class, inversedBy="pokemon")
+     */
+    private $attacks;
+
+    public function __construct()
+    {
+        $this->types = new ArrayCollection();
+        $this->attacks = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -122,6 +140,54 @@ class Pokemon
     public function setSortingNumber(int $sorting_number): self
     {
         $this->sorting_number = $sorting_number;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Type[]
+     */
+    public function getTypes(): Collection
+    {
+        return $this->types;
+    }
+
+    public function addType(Type $type): self
+    {
+        if (!$this->types->contains($type)) {
+            $this->types[] = $type;
+        }
+
+        return $this;
+    }
+
+    public function removeType(Type $type): self
+    {
+        $this->types->removeElement($type);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Attack[]
+     */
+    public function getAttacks(): Collection
+    {
+        return $this->attacks;
+    }
+
+    public function addAttack(Attack $attack): self
+    {
+        if (!$this->attacks->contains($attack)) {
+            $this->attacks[] = $attack;
+        }
+
+        return $this;
+    }
+
+    public function removeAttack(Attack $attack): self
+    {
+        $this->attacks->removeElement($attack);
 
         return $this;
     }
