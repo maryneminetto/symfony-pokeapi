@@ -2,14 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
  * @ORM\Entity(repositoryClass=TypeRepository::class)
  */
 class Type
@@ -24,7 +22,7 @@ class Type
     /**
      * @ORM\Column(type="integer")
      */
-    private $pokeapi_id;
+    private $pokeapiId;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -34,16 +32,16 @@ class Type
     /**
      * @ORM\ManyToMany(targetEntity=Pokemon::class, mappedBy="types")
      */
-    private $pokemon;
+    private $pokemons;
 
     /**
-     * @ORM\OneToMany(targetEntity=Attack::class, mappedBy="type", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Attack::class, mappedBy="type")
      */
     private $attacks;
 
     public function __construct()
     {
-        $this->pokemon = new ArrayCollection();
+        $this->pokemons = new ArrayCollection();
         $this->attacks = new ArrayCollection();
     }
 
@@ -54,12 +52,12 @@ class Type
 
     public function getPokeapiId(): ?int
     {
-        return $this->pokeapi_id;
+        return $this->pokeapiId;
     }
 
-    public function setPokeapiId(int $pokeapi_id): self
+    public function setPokeapiId(int $pokeapiId): self
     {
-        $this->pokeapi_id = $pokeapi_id;
+        $this->pokeapiId = $pokeapiId;
 
         return $this;
     }
@@ -79,15 +77,15 @@ class Type
     /**
      * @return Collection|Pokemon[]
      */
-    public function getPokemon(): Collection
+    public function getPokemons(): Collection
     {
-        return $this->pokemon;
+        return $this->pokemons;
     }
 
     public function addPokemon(Pokemon $pokemon): self
     {
-        if (!$this->pokemon->contains($pokemon)) {
-            $this->pokemon[] = $pokemon;
+        if (!$this->pokemons->contains($pokemon)) {
+            $this->pokemons[] = $pokemon;
             $pokemon->addType($this);
         }
 
@@ -96,7 +94,7 @@ class Type
 
     public function removePokemon(Pokemon $pokemon): self
     {
-        if ($this->pokemon->removeElement($pokemon)) {
+        if ($this->pokemons->removeElement($pokemon)) {
             $pokemon->removeType($this);
         }
 
