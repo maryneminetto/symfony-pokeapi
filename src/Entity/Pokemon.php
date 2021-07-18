@@ -16,7 +16,7 @@ class Pokemon
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
+     * @ORM\GeneratedValue(strategy="NONE")
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -25,11 +25,6 @@ class Pokemon
      * @ORM\Column(type="string", length=255)
      */
     private $name;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $pokeapi_id;
 
     /**
      * @ORM\Column(type="integer")
@@ -44,20 +39,20 @@ class Pokemon
     /**
      * @ORM\Column(type="integer")
      */
-    private $base_experience;
+    private $baseExperience;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sorting_number;
+    private $pokedexOrder;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Type::class, inversedBy="pokemon")
+     * @ORM\ManyToMany(targetEntity=Type::class, inversedBy="pokemons")
      */
     private $types;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Attack::class, inversedBy="pokemon")
+     * @ORM\OneToMany(targetEntity=PokemonAttack::class, mappedBy="pokemon", orphanRemoval=true)
      */
     private $attacks;
 
@@ -72,6 +67,12 @@ class Pokemon
         return $this->id;
     }
 
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -80,18 +81,6 @@ class Pokemon
     public function setName(string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getPokeapiId(): ?int
-    {
-        return $this->pokeapi_id;
-    }
-
-    public function setPokeapiId(int $pokeapi_id): self
-    {
-        $this->pokeapi_id = $pokeapi_id;
 
         return $this;
     }
@@ -122,24 +111,24 @@ class Pokemon
 
     public function getBaseExperience(): ?int
     {
-        return $this->base_experience;
+        return $this->baseExperience;
     }
 
-    public function setBaseExperience(int $base_experience): self
+    public function setBaseExperience(int $baseExperience): self
     {
-        $this->base_experience = $base_experience;
+        $this->baseExperience = $baseExperience;
 
         return $this;
     }
 
-    public function getSortingNumber(): ?int
+    public function getPokedexOrder(): ?int
     {
-        return $this->sorting_number;
+        return $this->pokedexOrder;
     }
 
-    public function setSortingNumber(int $sorting_number): self
+    public function setPokedexOrder(int $pokedexOrder): self
     {
-        $this->sorting_number = $sorting_number;
+        $this->pokedexOrder = $pokedexOrder;
 
         return $this;
     }
@@ -169,27 +158,32 @@ class Pokemon
     }
 
     /**
-     * @return Collection|Attack[]
+     * @return Collection|PokemonAttack[]
      */
     public function getAttacks(): Collection
     {
         return $this->attacks;
     }
 
-    public function addAttack(Attack $attack): self
+    public function addAttack(PokemonAttack $attack): self
     {
         if (!$this->attacks->contains($attack)) {
             $this->attacks[] = $attack;
+            $attack->setPokemon($this);
         }
 
         return $this;
     }
 
-    public function removeAttack(Attack $attack): self
+    public function removeAttack(PokemonAttack $attack): self
     {
-        $this->attacks->removeElement($attack);
+        if ($this->attacks->removeElement($attack)) {
+            // set the owning side to null (unless already changed)
+            if ($attack->getPokemon() === $this) {
+                $attack->setPokemon(null);
+            }
+        }
 
         return $this;
     }
-
 }

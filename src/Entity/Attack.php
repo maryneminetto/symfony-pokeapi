@@ -2,14 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\AttackRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
  * @ORM\Entity(repositoryClass=AttackRepository::class)
  */
 class Attack
@@ -24,7 +22,7 @@ class Attack
     /**
      * @ORM\Column(type="integer")
      */
-    private $pokeapi_id;
+    private $pokeapiId;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -47,19 +45,19 @@ class Attack
     private $power;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Pokemon::class, mappedBy="attacks")
-     */
-    private $pokemon;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Type::class, inversedBy="attacks")
      * @ORM\JoinColumn(nullable=false)
      */
     private $type;
 
+    /**
+     * @ORM\OneToMany(targetEntity=PokemonAttack::class, mappedBy="attack", orphanRemoval=true)
+     */
+    private $pokemons;
+
     public function __construct()
     {
-        $this->pokemon = new ArrayCollection();
+        $this->pokemons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,12 +67,12 @@ class Attack
 
     public function getPokeapiId(): ?int
     {
-        return $this->pokeapi_id;
+        return $this->pokeapiId;
     }
 
-    public function setPokeapiId(int $pokeapi_id): self
+    public function setPokeapiId(int $pokeapiId): self
     {
-        $this->pokeapi_id = $pokeapi_id;
+        $this->pokeapiId = $pokeapiId;
 
         return $this;
     }
@@ -127,33 +125,6 @@ class Attack
         return $this;
     }
 
-    /**
-     * @return Collection|Pokemon[]
-     */
-    public function getPokemon(): Collection
-    {
-        return $this->pokemon;
-    }
-
-    public function addPokemon(Pokemon $pokemon): self
-    {
-        if (!$this->pokemon->contains($pokemon)) {
-            $this->pokemon[] = $pokemon;
-            $pokemon->addAttack($this);
-        }
-
-        return $this;
-    }
-
-    public function removePokemon(Pokemon $pokemon): self
-    {
-        if ($this->pokemon->removeElement($pokemon)) {
-            $pokemon->removeAttack($this);
-        }
-
-        return $this;
-    }
-
     public function getType(): ?Type
     {
         return $this->type;
@@ -162,6 +133,36 @@ class Attack
     public function setType(?Type $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PokemonAttack[]
+     */
+    public function getPokemons(): Collection
+    {
+        return $this->pokemons;
+    }
+
+    public function addPokemon(PokemonAttack $pokemon): self
+    {
+        if (!$this->pokemons->contains($pokemon)) {
+            $this->pokemons[] = $pokemon;
+            $pokemon->setAttack($this);
+        }
+
+        return $this;
+    }
+
+    public function removePokemon(PokemonAttack $pokemon): self
+    {
+        if ($this->pokemons->removeElement($pokemon)) {
+            // set the owning side to null (unless already changed)
+            if ($pokemon->getAttack() === $this) {
+                $pokemon->setAttack(null);
+            }
+        }
 
         return $this;
     }
