@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\PokemonAttackRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ORM\Entity(repositoryClass=PokemonAttackRepository::class)
@@ -15,6 +17,7 @@ class PokemonAttack
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity=Pokemon::class, inversedBy="attacks")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"attack:get"})
      */
     private $pokemon;
 
@@ -22,11 +25,13 @@ class PokemonAttack
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity=Attack::class, inversedBy="pokemons")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"pokemon:get"})
      */
     private $attack;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"pokemon:get", "attack:get"})
      */
     private $level;
 
